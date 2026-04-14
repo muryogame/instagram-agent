@@ -28,7 +28,7 @@ jobs:
         with:
           python-version: '3.11'
           cache: 'pip'
-          cache-dependency-path: x_agent/requirements.txt
+          cache-dependency-path: requirements.txt
 
       - name: 依存パッケージインストール
         run: pip install -r requirements.txt
