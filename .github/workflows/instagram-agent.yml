@@ -31,7 +31,6 @@ jobs:
           cache-dependency-path: x_agent/requirements.txt
 
       - name: 依存パッケージインストール
-        working-directory: x_agent
         run: pip install -r requirements.txt
 
       - name: 日本語フォントインストール
@@ -40,7 +39,6 @@ jobs:
           sudo apt-get install -y fonts-noto-cjk
 
       - name: dataディレクトリ作成
-        working-directory: x_agent
         run: mkdir -p data/images logs
 
       - name: 投稿タイプを判定
@@ -60,7 +58,6 @@ jobs:
           fi
 
       - name: エージェント実行
-        working-directory: x_agent
         env:
           INSTAGRAM_ACCESS_TOKEN: ${{ secrets.INSTAGRAM_ACCESS_TOKEN }}
           INSTAGRAM_ACCOUNT_ID: ${{ secrets.INSTAGRAM_ACCOUNT_ID }}
@@ -79,7 +76,6 @@ jobs:
 
       - name: エンゲージメント更新（夜21時のみ）
         if: contains(github.event.schedule, '0 12')
-        working-directory: x_agent
         env:
           INSTAGRAM_ACCESS_TOKEN: ${{ secrets.INSTAGRAM_ACCESS_TOKEN }}
           INSTAGRAM_ACCOUNT_ID: ${{ secrets.INSTAGRAM_ACCOUNT_ID }}
@@ -93,7 +89,7 @@ jobs:
         with:
           name: agent-logs-${{ github.run_number }}
           path: |
-            x_agent/agent_history.log
-            x_agent/data/latest_insight.json
-            x_agent/data/performance_analysis.json
+            agent_history.log
+            data/latest_insight.json
+            data/performance_analysis.json
           retention-days: 30
