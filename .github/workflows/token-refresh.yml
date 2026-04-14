@@ -1,0 +1,97 @@
+name: Instagramトークン自動更新
+
+on:
+  schedule:
+    - cron: '0 0 * * 0'  # 毎週日曜日 JST 09:00 に自動実行
+  workflow_dispatch:      # 手動実行も可能
+
+jobs:
+  refresh-token:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    permissions:
+      contents: read
+
+    steps:
+      - name: リポジトリをチェックアウト
+        uses: actions/checkout@v4
+
+      - name: Python セットアップ
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: 依存パッケージインストール
+        run: pip install requests python-dotenv
+
+      - name: トークン有効期限を確認・更新
+        env:
+          INSTAGRAM_ACCESS_TOKEN: ${{ secrets.INSTAGRAM_ACCESS_TOKEN }}
+          FACEBOOK_APP_ID: ${{ secrets.FACEBOOK_APP_ID }}
+          FACEBOOK_APP_SECRET: ${{ secrets.FACEBOOK_APP_SECRET }}
+          GH_TOKEN: ${{ secrets.GH_PAT }}
+        run: |
+          python3 -c "
+          import requests, os, json
+          from datetime import datetime
+
+          token = os.environ['INSTAGRAM_ACCESS_TOKEN']
+          app_id = os.environ['FACEBOOK_APP_ID']
+          app_secret = os.environ['FACEBOOK_APP_SECRET']
+
+          # 有効期限確認
+          resp = requests.get(
+              'https://graph.facebook.com/v19.0/debug_token',
+              params={
+                  'input_token': token,
+                  'access_token': f'{app_id}|{app_secret}'
+              }
+          )
+          data = resp.json().get('data', {})
+          expires_at = data.get('expires_at', 0)
+          is_valid = data.get('is_valid', False)
+
+          if expires_at:
+              expires_dt = datetime.fromtimestamp(expires_at)
+              days_left = (expires_dt - datetime.now()).days
+              print(f'トークン有効期限: {expires_dt.strftime(\"%Y-%m-%d\")} (残り{days_left}日)')
+
+              if days_left < 30:
+                  print('30日以内に切れるため更新します...')
+                  resp2 = requests.get(
+                      'https://graph.facebook.com/v19.0/oauth/access_token',
+                      params={
+                          'grant_type': 'fb_exchange_token',
+                          'client_id': app_id,
+                          'client_secret': app_secret,
+                          'fb_exchange_token': token,
+                      }
+                  )
+                  new_data = resp2.json()
+                  if 'access_token' in new_data:
+                      print('新しいトークン取得成功')
+                      # GitHub CLIでSecretsを更新
+                      import subprocess
+                      result = subprocess.run(
+                          ['gh', 'secret', 'set', 'INSTAGRAM_ACCESS_TOKEN',
+                           '--body', new_data['access_token'],
+                           '--repo', 'muryogame/instagram-agent'],
+                          env={**os.environ, 'GH_TOKEN': os.environ['GH_TOKEN']},
+                          capture_output=True, text=True
+                      )
+                      if result.returncode == 0:
+                          print('GitHub Secrets更新完了')
+                      else:
+                          print(f'GitHub Secrets更新失敗: {result.stderr}')
+                  else:
+                      print(f'トークン更新失敗: {new_data}')
+              else:
+                  print(f'更新不要（残り{days_left}日）')
+          else:
+              print('無期限トークン: 更新不要')
+          "
+
+      - name: GitHub CLI インストール確認
+        run: gh --version
+        env:
+          GH_TOKEN: ${{ secrets.GH_PAT }}
