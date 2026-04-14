@@ -1,0 +1,38 @@
+# 機密情報 - 絶対にコミットしない
+.env
+*.env
+.env.*
+!.env.example
+
+# ログ・データ
+logs/
+data/*.json
+data/*.db
+agent_history.log
+
+# Python
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.Python
+*.egg-info/
+dist/
+build/
+.venv/
+venv/
+env/
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# OS
+.DS_Store
+Thumbs.db
+
+# SQLite DB（投稿履歴）
+*.db
+*.sqlite

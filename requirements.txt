@@ -1,0 +1,12 @@
+anthropic>=0.25.0
+python-dotenv>=1.0.0
+pytrends>=4.9.2
+feedparser>=6.0.11
+APScheduler>=3.10.4
+requests>=2.31.0
+beautifulsoup4>=4.12.3
+lxml>=5.1.0
+tenacity>=8.2.3
+rich>=13.7.0
+sqlite-utils>=3.36
+Pillow>=10.3.0

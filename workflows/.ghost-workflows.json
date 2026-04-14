@@ -1,0 +1,59 @@
+{
+  "version": "1.0",
+  "name": "instagram-monetization-agent",
+  "description": "24時間稼働 Instagram自律収益化エージェント",
+  "timezone": "Asia/Tokyo",
+  "workflows": [
+    {
+      "id": "morning_post",
+      "name": "朝のインサイト投稿",
+      "schedule": "0 8 * * *",
+      "command": "python main.py run-now morning_insight",
+      "description": "08:00 トレンド収集 + 教育型投稿",
+      "retry": {
+        "max_attempts": 3,
+        "delay_seconds": 300
+      }
+    },
+    {
+      "id": "noon_post",
+      "name": "昼のTips投稿",
+      "schedule": "0 12 * * *",
+      "command": "python main.py run-now tips",
+      "description": "12:00 昼休みを狙ったTips投稿",
+      "retry": {
+        "max_attempts": 3,
+        "delay_seconds": 300
+      }
+    },
+    {
+      "id": "evening_post",
+      "name": "夕方の深掘り投稿",
+      "schedule": "0 18 * * *",
+      "command": "python main.py run-now deep_carousel",
+      "description": "18:00 帰宅時間帯の共感・深掘り投稿",
+      "retry": {
+        "max_attempts": 3,
+        "delay_seconds": 300
+      }
+    },
+    {
+      "id": "night_post",
+      "name": "夜の導線投稿",
+      "schedule": "0 21 * * *",
+      "command": "python main.py run-now sales_funnel",
+      "description": "21:00 最アクティブ時間帯の収益化導線投稿",
+      "retry": {
+        "max_attempts": 3,
+        "delay_seconds": 300
+      }
+    },
+    {
+      "id": "engagement_update",
+      "name": "エンゲージメント更新",
+      "schedule": "30 */2 * * *",
+      "command": "python main.py update-metrics",
+      "description": "2時間ごとにインサイトデータ取得・学習ループ更新"
+    }
+  ]
+}
